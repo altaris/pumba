@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# ==============================================================================
+# Variables
+# ==============================================================================
+
+GIT_BRANCH="${GIT_BRANCH:-master}"
+PIP_REQUIREMENTS_FILE="${PIP_REQUIREMENTS_FILE:-requirements.txt}"
+PYTHON_MAIN="${PYTHON_MAIN:-main.py}"
+PYTHON_VIRTUALENV=".virtualenv"
+REPOSITORY_PATH="/usr/src/app"
+
+# ==============================================================================
+# Utilities
+# ==============================================================================
+
+_fatal() {
+    echo "ERROR:" "$@" >&2
+    exit 1
+}
+
+_fail() {
+    _fatal "Last command failed, exiting"
+}
+
+_assert_is_set() {
+    if [ -z "$1" ]; then
+        _fatal "Value for environment variable \"$2\" missing"
+    fi
+}
+
+_display_step() {
+    LINE_LENGTH=${LINE_LENGTH:-$(tput cols)}
+    [ -z "$LINE_LENGTH" ] && LINE_LENGTH=80
+    LINE="$(printf "%0${LINE_LENGTH}d" 0 | tr '0' '=')"
+    echo "
+$LINE
+$(date --rfc-3339 seconds)
+$1
+$LINE
+"
+}
+
+# ==============================================================================
+# Script
+# ==============================================================================
+
+_assert_is_set "$GIT_BRANCH" GIT_BRANCH
+_assert_is_set "$GIT_URL" GIT_URL
+_assert_is_set "$PIP_REQUIREMENTS_FILE" PIP_REQUIREMENTS_FILE
+_assert_is_set "$REPOSITORY_PATH" REPOSITORY_PATH
+
+_display_step "Cloning git repository $GIT_URL"
+
+mkdir -p $REPOSITORY_PATH       || _fail
+cd $REPOSITORY_PATH             || _fail
+git clone "$GIT_URL" ./         || _fail
+git submodule update --init --recursive
+
+if [ "$GIT_BRANCH" != "master" ]; then
+    git checkout -b "$GIT_BRANCH" "origin/$GIT_BRANCH"
+fi
+
+_display_step "Installing dependencies"
+
+virtualenv "$PYTHON_VIRTUALENV" -p python3
+# shellcheck disable=SC1090
+. "$PYTHON_VIRTUALENV/bin/activate"
+pip install -r "$PIP_REQUIREMENTS_FILE"
+
+_display_step "Running $PYTHON_MAIN"
+
+python3 "$PYTHON_MAIN"
+
+_display_step "Exiting"
