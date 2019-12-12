@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # ==============================================================================
 # Variables
 # ==============================================================================
@@ -14,30 +16,19 @@ REPOSITORY_PATH="/usr/src/app"
 # Utilities
 # ==============================================================================
 
-_fatal() {
-    echo "ERROR:" "$@" >&2
-    exit 1
-}
-
-_fail() {
-    _fatal "Last command failed, exiting"
-}
-
 _assert_is_set() {
     if [ -z "$1" ]; then
-        _fatal "Value for environment variable \"$2\" missing"
+        echo "VALUE FOR ENVIRONMENT VARIABLE \"$2\" MISSING" >&2
+        exit 1
     fi
 }
 
 _display_step() {
-    LINE_LENGTH=${LINE_LENGTH:-$(tput cols)}
-    [ -z "$LINE_LENGTH" ] && LINE_LENGTH=80
-    LINE="$(printf "%0${LINE_LENGTH}d" 0 | tr '0' '=')"
     echo "
-$LINE
+================================================================================
 $(date --rfc-3339 seconds)
 $1
-$LINE
+================================================================================
 "
 }
 
@@ -53,11 +44,12 @@ _assert_is_set "$REPOSITORY_PATH" REPOSITORY_PATH
 
 _display_step "Cloning git repository $GIT_URL"
 
-mkdir -p "$REPOSITORY_PATH"                     || _fail
-cd "$REPOSITORY_PATH"                           || _fail
-[ -d ".git" ] || git clone "$GIT_URL" ./        || _fail
+mkdir -p "$REPOSITORY_PATH"
+cd "$REPOSITORY_PATH"
+[ -d ".git" ] || git clone "$GIT_URL" ./
 git submodule update --init --recursive
-[ "$GIT_BRANCH" != "master" ] && git checkout -b "$GIT_BRANCH" "origin/$GIT_BRANCH"
+[ "$GIT_BRANCH" != "$(git rev-parse --abbrev-ref HEAD)" ] && \
+    git checkout -b "$GIT_BRANCH" "origin/$GIT_BRANCH"
 git pull
 
 _display_step "Setting up virtualenv"
