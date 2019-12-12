@@ -48,24 +48,26 @@ $LINE
 _assert_is_set "$GIT_BRANCH" GIT_BRANCH
 _assert_is_set "$GIT_URL" GIT_URL
 _assert_is_set "$PIP_REQUIREMENTS_FILE" PIP_REQUIREMENTS_FILE
+_assert_is_set "$PYTHON_MAIN" PYTHON_MAIN
 _assert_is_set "$REPOSITORY_PATH" REPOSITORY_PATH
 
 _display_step "Cloning git repository $GIT_URL"
 
-mkdir -p $REPOSITORY_PATH       || _fail
-cd $REPOSITORY_PATH             || _fail
-git clone "$GIT_URL" ./         || _fail
+mkdir -p "$REPOSITORY_PATH"                     || _fail
+cd "$REPOSITORY_PATH"                           || _fail
+[ -d ".git" ] || git clone "$GIT_URL" ./        || _fail
 git submodule update --init --recursive
+[ "$GIT_BRANCH" != "master" ] && git checkout -b "$GIT_BRANCH" "origin/$GIT_BRANCH"
+git pull
 
-if [ "$GIT_BRANCH" != "master" ]; then
-    git checkout -b "$GIT_BRANCH" "origin/$GIT_BRANCH"
-fi
+_display_step "Setting up virtualenv"
+
+[ -d "$PYTHON_VIRTUALENV" ] || virtualenv "$PYTHON_VIRTUALENV" -p python3
+# shellcheck disable=SC1090
+. "$PYTHON_VIRTUALENV/bin/activate"
 
 _display_step "Installing dependencies"
 
-virtualenv "$PYTHON_VIRTUALENV" -p python3
-# shellcheck disable=SC1090
-. "$PYTHON_VIRTUALENV/bin/activate"
 pip install -r "$PIP_REQUIREMENTS_FILE"
 
 _display_step "Running $PYTHON_MAIN"

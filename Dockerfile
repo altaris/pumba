@@ -7,6 +7,7 @@ RUN apt update                                  && \
 ENV PATH /app:$PATH
 COPY pumba /app/pumba
 
+VOLUME /usr/src/app
 WORKDIR /usr/src/app
 
 CMD pumba
