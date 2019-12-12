@@ -46,15 +46,28 @@ _display_step "Cloning git repository $GIT_URL"
 
 mkdir -p "$REPOSITORY_PATH"
 cd "$REPOSITORY_PATH"
-[ -d ".git" ] || git clone "$GIT_URL" ./
+if [ -d ".git" ]; then
+    echo "Git repository already present, skipping"
+else
+    git clone "$GIT_URL" ./
+fi
+echo "Updating submodules"
 git submodule update --init --recursive
-[ "$GIT_BRANCH" != "$(git rev-parse --abbrev-ref HEAD)" ] && \
+if [ "$GIT_BRANCH" != "$(git rev-parse --abbrev-ref HEAD)" ]; then
+    echo "Switching to branch $GIT_BRANCH"
     git checkout -b "$GIT_BRANCH" "origin/$GIT_BRANCH"
+fi
+echo "Pulling changes"
 git pull
 
 _display_step "Setting up virtualenv"
 
-[ -d "$PYTHON_VIRTUALENV" ] || virtualenv "$PYTHON_VIRTUALENV" -p python3
+if [ -d "$PYTHON_VIRTUALENV" ]; then
+    echo "Virtual env found at $PYTHON_VIRTUALENV, skipping"
+else
+    virtualenv "$PYTHON_VIRTUALENV" -p python3
+fi
+echo "Activating virtualenv"
 # shellcheck disable=SC1090
 . "$PYTHON_VIRTUALENV/bin/activate"
 
