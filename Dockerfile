@@ -5,7 +5,7 @@ RUN apt update                                  && \
     apt install -y git python-virtualenv
 
 ENV PATH /app:$PATH
-COPY pumba /app
+COPY pumba /app/pumba
 
 WORKDIR /usr/src/app
 
