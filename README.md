@@ -17,10 +17,10 @@ dependencies, run.
 
 ```sh
 docker volume create pumba-test-volume
-docker run --rm										 \
-	--env "GIT_URL=https://github.com/user/repo.git" \
-	--env "GIT_BRANCH=release"						 \
-	--env "PYTHON_MAIN=src/main.py"					 \
-	--volume "pumba-test-volume:/usr/src/app/"		 \
-	altaris/pumba
+docker run --rm                                                         \
+    --env "GIT_URL=https://username:password@github.com/user/repo.git"  \
+    --env "GIT_BRANCH=release"                                          \
+    --env "PYTHON_MAIN=src/main.py"                                     \
+    --volume "pumba-test-volume:/usr/src/app/"                          \
+    altaris/pumba
 ```
