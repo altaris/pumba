@@ -8,7 +8,8 @@ set -e
 
 GIT_BRANCH="${GIT_BRANCH:-master}"
 PIP_REQUIREMENTS_FILE="${PIP_REQUIREMENTS_FILE:-requirements.txt}"
-PYTHON_MAIN="${PYTHON_MAIN:-main.py}"
+PYTHON_MAIN="${PYTHON_MAIN}"
+PYTHON_MAIN_MODULE="${PYTHON_MAIN_MODULE}"
 PYTHON_VIRTUALENV=".virtualenv"
 REPOSITORY_PATH="/usr/src/app"
 
@@ -36,10 +37,16 @@ $1
 # Script
 # ==============================================================================
 
+if [ -z "$PYTHON_MAIN" ]; then
+    _assert_is_set "$PYTHON_MAIN_MODULE" PYTHON_MAIN_MODULE
+    COMMAND="python3 -m $PYTHON_MAIN_MODULE"
+else
+    COMMAND="python3 $PYTHON_MAIN"
+fi
+
 _assert_is_set "$GIT_BRANCH" GIT_BRANCH
 _assert_is_set "$GIT_URL" GIT_URL
 _assert_is_set "$PIP_REQUIREMENTS_FILE" PIP_REQUIREMENTS_FILE
-_assert_is_set "$PYTHON_MAIN" PYTHON_MAIN
 _assert_is_set "$REPOSITORY_PATH" REPOSITORY_PATH
 
 _display_step "Cloning git repository $GIT_URL"
@@ -75,8 +82,8 @@ _display_step "Installing dependencies"
 
 pip install -r "$PIP_REQUIREMENTS_FILE"
 
-_display_step "Running $PYTHON_MAIN"
+_display_step "Running \"$COMMAND\""
 
-python3 "$PYTHON_MAIN"
+$COMMAND
 
 _display_step "Exiting"
