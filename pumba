@@ -8,8 +8,8 @@ set -e
 
 GIT_BRANCH="${GIT_BRANCH:-master}"
 PIP_REQUIREMENTS_FILE="${PIP_REQUIREMENTS_FILE:-requirements.txt}"
-PYTHON_MAIN="${PYTHON_MAIN}"
 PYTHON_MAIN_MODULE="${PYTHON_MAIN_MODULE}"
+PYTHON_MAIN="${PYTHON_MAIN}"
 PYTHON_VIRTUALENV=".virtualenv"
 REPOSITORY_PATH="/usr/src/app"
 
@@ -37,13 +37,15 @@ $1
 # Script
 # ==============================================================================
 
-if [ -z "$PYTHON_MAIN" ]; then
-    _assert_is_set "$PYTHON_MAIN_MODULE" PYTHON_MAIN_MODULE
+if [ -n "$PYTHON_MAIN" ]; then
+    COMMAND="python3 $PYTHON_MAIN"
+elif [ -n "$PYTHON_MAIN_MODULE" ]; then
     COMMAND="python3 -m $PYTHON_MAIN_MODULE"
 else
-    COMMAND="python3 $PYTHON_MAIN"
+    COMMAND=${COMMAND}
 fi
 
+_assert_is_set "$COMMAND" COMMAND
 _assert_is_set "$GIT_BRANCH" GIT_BRANCH
 _assert_is_set "$GIT_URL" GIT_URL
 _assert_is_set "$PIP_REQUIREMENTS_FILE" PIP_REQUIREMENTS_FILE
@@ -84,6 +86,6 @@ pip install -r "$PIP_REQUIREMENTS_FILE"
 
 _display_step "Running \"$COMMAND\""
 
-$COMMAND
+eval "$COMMAND"
 
 _display_step "Exiting"
