@@ -1,6 +1,9 @@
 pumba
 =====
 
+[![Docker Build Status](https://img.shields.io/docker/cloud/build/altaris/pumba)](https://hub.docker.com/r/altaris/pumba/)
+[![MIT License](https://badgen.net/badge/license/MIT/blue)](https://choosealicense.com/licenses/mit/)
+
 Had no idea what to call it. It's just a docker image with python and git.
 Pulls latest version of your python codebase from a git repository, installs
 dependencies, run.
