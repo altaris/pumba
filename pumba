@@ -82,7 +82,7 @@ echo "Activating virtualenv"
 
 _display_step "Installing dependencies"
 
-pip install -r "$PIP_REQUIREMENTS_FILE"
+pip install -U -r "$PIP_REQUIREMENTS_FILE"
 
 _display_step "Running \"$COMMAND\""
 
